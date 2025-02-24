@@ -15,6 +15,12 @@ void OLED_Write(uint8_t mode, uint8_t data) {
  * @brief  Initialize the OLED display
  */
 void OLED_Init(void) {
+
+    if (I2C_Open() < 0) {
+        printf("Failed to open I2C.\n");
+        return;
+    }
+
     if (i2c_fd < 0) {
         fprintf(stderr, "Error: I2C not initialized. Call I2C_Open() in main.c\n");
         return;
@@ -96,9 +102,37 @@ void OLED_ShowString(uint8_t x, uint8_t y, const char* str) {
     }
 }
 
-void OLED_ShowUInt8(uint8_t x, uint8_t y, uint8_t num) {
+void OLED_ShowUInt8_twochar(uint8_t x, uint8_t y, uint8_t num) {
     char str[3];  // 2 digits + null terminator
     sprintf(str, "%02u", num);  // Convert to string
+    OLED_ShowString(x, y, str);
+}
+
+void OLED_ShowUInt8_threechar(uint8_t x, uint8_t y, uint8_t num)
+{
+    char str[4];  // 3 digits + null terminator
+
+    // Convert num to 3-digit string with leading zeros
+    sprintf(str, "%03u", num);  // "%03u" ensures 3 digits with leading zeros
+
+    // Display the string on OLED at (x, y)
+    OLED_ShowString(x, y, str);
+}
+
+void OLED_ShowFloat(uint8_t x, uint8_t y, float num)
+{
+    char str[7];  // Format: "99.99%"+ null terminator
+
+    // Ensure the number is within the expected range
+    if (num < 90.00f)
+        num = 90.00f;
+    else if (num > 99.99f)
+        num = 99.99f;
+
+    // Format the float to 2 decimal places and add '%'
+    sprintf(str, "%.2f%%", num);  // Format: "xx.xx%"
+
+    // Display the formatted string on OLED
     OLED_ShowString(x, y, str);
 }
 

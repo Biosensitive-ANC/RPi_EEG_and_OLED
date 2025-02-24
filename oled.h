@@ -19,7 +19,9 @@ void OLED_Clear(void);      // Clear OLED display
 void OLED_Fill(void);       // Turn on all pixels
 void OLED_ShowChar(uint8_t x, uint8_t y, char ch);
 void OLED_ShowString(uint8_t x, uint8_t y, const char* str);
-void OLED_ShowUInt8(uint8_t x, uint8_t y, uint8_t num);
+void OLED_ShowUInt8_twochar(uint8_t x, uint8_t y, uint8_t num);
+void OLED_ShowUInt8_threechar(uint8_t x, uint8_t y, uint8_t num);
+void OLED_ShowFloat(uint8_t x, uint8_t y, float num);
 
 extern const uint8_t Font8x8[96][8]; // 8x8 font table
 

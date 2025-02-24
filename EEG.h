@@ -21,8 +21,8 @@ private:
     std::mutex dataMutex;       // Mutex to protect shared data
 
 public:
-    static uint8_t attention;   // Global variable for attention level
-    static uint8_t meditation;  // Global variable for meditation level
+    uint8_t attention;   // attention level
+    uint8_t meditation;  // meditation level
 
     EEGSerial();
     ~EEGSerial();
@@ -32,7 +32,7 @@ public:
     void processEEGData();
     void startListening();  // Start the receiving thread
     void stopListening();   // Stop the receiving thread
-    std::mutex& getDataMutex();
+    void getData(uint8_t& out_attention, uint8_t& out_meditation);
 };
 
 #endif // EEG_H

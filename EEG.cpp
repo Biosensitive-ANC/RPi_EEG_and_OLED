@@ -1,17 +1,22 @@
 #include "EEG.h"
 
-// Initialize static global variables
-uint8_t EEGSerial::attention = 0;
-uint8_t EEGSerial::meditation = 0;
 
 EEGSerial::EEGSerial() : receive_ok(false) {
+    attention = 0;
+    meditation = 0;
+
     fd = open(SERIAL_PORT, O_RDWR | O_NOCTTY | O_NDELAY);
     if (fd == -1) {
         std::cerr << "Error: Cannot open " << SERIAL_PORT << std::endl;
-        exit(1);
+        //exit(1);
     }
-    configureSerialPort();
+    else {
+        configureSerialPort();
+        startListening();  
+        std::cout << "EEGSerial initialized and listening on " << SERIAL_PORT << std::endl;
+    }
 }
+
 
 EEGSerial::~EEGSerial() {
     stopListening();  // Stop listening thread on exit
@@ -22,7 +27,7 @@ void EEGSerial::configureSerialPort() {
     struct termios options;
     tcgetattr(fd, &options);
 
-    // Set baud rate to 115200
+    // Set baud rate to 9600
     cfsetispeed(&options, B9600);
     cfsetospeed(&options, B9600);
 
@@ -88,14 +93,14 @@ void EEGSerial::processEEGData() {
                 receive[4] == 0x38 || receive[4] == 0x50 || receive[4] == 0x51 ||
                 receive[4] == 0x52 || receive[4] == 0x6B || receive[4] == 0xC8)
             {
-                std::cout << "[EEG] Signal Quality Pool: " << (int)receive[4] << ", Please wear it again!" << std::endl;
+                std::cout << "[EEG] Signal Quality Pool, Please wear it again!" << std::endl;
             }else{
                 std::lock_guard<std::mutex> lock(dataMutex);
                 attention = new_attention;
                 meditation = new_meditation;
 
-                std::cout << "[EEG Thread Update] Attention: " << (int)attention
-                    << ", Meditation: " << (int)meditation << std::endl;
+                /*std::cout << "[EEG Thread Update] Attention: " << (int)attention
+                    << ", Meditation: " << (int)meditation << std::endl;*/
             }
         }
         else {
@@ -116,7 +121,9 @@ void EEGSerial::stopListening() {
     }
 }
 
-std::mutex& EEGSerial::getDataMutex()
+void EEGSerial::getData(uint8_t& out_attention, uint8_t& out_meditation)
 {
-    return dataMutex;
+	std::lock_guard<std::mutex> lock(dataMutex);
+	out_attention = attention;
+	out_meditation = meditation;
 }
